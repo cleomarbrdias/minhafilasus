@@ -2,13 +2,13 @@
 
 Aplicativo Flutter focado em **transparência de filas do SUS**, com autenticação via **gov.br**, acompanhamento da posição na fila, histórico de movimentações e fluxo de confirmação de procedimento com envio de evidência para validação pela **SES**.
 
-> Projeto desenvolvido como base para **TCC/MVP governamental**, priorizando usabilidade, transparência de informações, organização arquitetural e evolução futura para integração real com sistemas públicos de saúde.
+> Projeto desenvolvido como base para **TCC/MVP governamental**, priorizando usabilidade, transparência de informações, organização arquitetural, acessibilidade e evolução futura para integração real com sistemas públicos de saúde.
 
 ---
 
 ## Visão geral
 
-O **MinhaFila Saúde** foi concebido para permitir que o cidadão acompanhe, de forma simples e segura, a sua posição em filas de atendimento do SUS. Além disso, o sistema propõe um mecanismo colaborativo de atualização da fila, permitindo que o usuário informe quando já realizou determinado procedimento por outro canal, contribuindo para maior eficiência da gestão pública.
+O **MinhaFila Saúde** foi concebido para permitir que o cidadão acompanhe, de forma simples, segura e acessível, a sua posição em filas de atendimento do SUS. Além disso, o sistema propõe um mecanismo colaborativo de atualização da fila, permitindo que o usuário informe quando já realizou determinado procedimento por outro canal, contribuindo para maior eficiência da gestão pública.
 
 ### Principais objetivos da solução
 
@@ -16,6 +16,7 @@ O **MinhaFila Saúde** foi concebido para permitir que o cidadão acompanhe, de 
 - melhorar a experiência do cidadão no acompanhamento da solicitação;
 - reduzir inconsistências na fila causadas por registros desatualizados;
 - apoiar a SES com um fluxo digital de validação e atualização da fila;
+- oferecer acessibilidade para usuários com dificuldade de leitura;
 - preparar uma base técnica robusta para evolução acadêmica e produtiva.
 
 ---
@@ -44,6 +45,10 @@ O **MinhaFila Saúde** foi concebido para permitir que o cidadão acompanhe, de 
 - Histórico de movimentações
 - Central de notificações
 - Tela de ajustes e informações do ambiente
+- Recurso de **acessibilidade por áudio**
+- Leitura manual da posição na fila com botão **“Ouvir posição”**
+- Opção de leitura automática ao abrir a tela principal
+- Ajuste de velocidade da fala
 - Testes básicos de domínio e widget
 - Pipeline inicial de CI com GitHub Actions
 
@@ -70,11 +75,16 @@ Ao tocar no card principal, o cidadão pode:
 ### Validação
 O sistema registra a solicitação e muda o status para **“Em validação pela SES”**, simulando o fluxo que futuramente será integrado ao backend institucional.
 
+### Acessibilidade por áudio
+O aplicativo oferece suporte inicial a usuários com baixa alfabetização ou dificuldade de leitura. A posição na fila pode ser lida em voz alta por meio de:
+- botão manual na tela principal;
+- leitura automática configurável nas preferências do app.
+
 ---
 
 ## Arquitetura da solução
 
-A aplicação foi estruturada com foco em **escalabilidade, testabilidade e separação de responsabilidades**.
+A aplicação foi estruturada com foco em **escalabilidade, testabilidade, acessibilidade e separação de responsabilidades**.
 
 ### App mobile
 - **Flutter**
