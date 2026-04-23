@@ -8,9 +8,5 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR');
 
-  runApp(
-    const ProviderScope(
-      child: MinhaFilaSaudeApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MinhaFilaSaudeApp()));
 }

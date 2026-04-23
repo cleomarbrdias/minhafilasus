@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:minhafilasaude/app/config/app_config.dart';
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:minhafilasaude/features/home/presentation/controllers/accessibility_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/section_title.dart';
 
@@ -14,16 +15,20 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
+    final accessibilityState = ref.watch(accessibilityControllerProvider);
+    final accessibilityController = ref.read(
+      accessibilityControllerProvider.notifier,
+    );
 
     return SafeArea(
       child: AppResponsiveBody(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: <Widget>[
             const SectionTitle(
               title: 'Ajustes',
-              subtitle: 'Informações de ambiente, integração e sessão atual.',
+              subtitle:
+                  'Informações de ambiente, integração, sessão atual e acessibilidade.',
             ),
             const SizedBox(height: 20),
             Card(
@@ -56,6 +61,42 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: AppConfig.isSesConfigured
                         ? AppConfig.apiBaseUrl
                         : 'Ainda não conectada. Mock em execução.',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              child: Column(
+                children: <Widget>[
+                  SwitchListTile.adaptive(
+                    secondary: const Icon(Icons.record_voice_over_rounded),
+                    title: const Text('Ler posição da fila automaticamente'),
+                    subtitle: const Text(
+                      'Quando ativado, o app anuncia em áudio a posição atual ao abrir a tela inicial.',
+                    ),
+                    value: accessibilityState.autoAnnounceQueuePosition,
+                    onChanged:
+                        accessibilityController.setAutoAnnounceQueuePosition,
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.speed_rounded),
+                    title: const Text('Velocidade da fala'),
+                    subtitle: Text(
+                      'Valor atual: ${accessibilityState.speechRate.toStringAsFixed(2)}',
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Slider(
+                      value: accessibilityState.speechRate,
+                      min: 0.3,
+                      max: 0.65,
+                      divisions: 7,
+                      label: accessibilityState.speechRate.toStringAsFixed(2),
+                      onChanged: accessibilityController.setSpeechRate,
+                    ),
                   ),
                 ],
               ),

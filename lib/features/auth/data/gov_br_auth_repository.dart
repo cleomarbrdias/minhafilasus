@@ -21,7 +21,7 @@ class GovBrAuthRepository implements AuthRepository {
       );
     }
 
-    final AuthorizationTokenResponse? response = await _appAuth
+    final AuthorizationTokenResponse response = await _appAuth
         .authorizeAndExchangeCode(
           AuthorizationTokenRequest(
             AppConfig.govBrClientId,
@@ -32,7 +32,7 @@ class GovBrAuthRepository implements AuthRepository {
           ),
         );
 
-    if (response == null || response.idToken == null) {
+    if (response.idToken == null) {
       throw Exception('Falha ao obter o token de identidade do gov.br.');
     }
 

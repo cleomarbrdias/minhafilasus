@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minhafilasaude/core/services/audio_announcement_service.dart';
 
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/core/widgets/empty_state_card.dart';
+import 'package:minhafilasaude/features/home/domain/models/dashboard_snapshot.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_request.dart';
+import 'package:minhafilasaude/features/home/presentation/controllers/accessibility_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/screens/status_screen.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/active_queue_card.dart';
@@ -14,11 +17,24 @@ import 'package:minhafilasaude/features/home/presentation/widgets/procedure_conf
 import 'package:minhafilasaude/features/home/presentation/widgets/section_title.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/validation_sheet.dart';
 
-class HomeScreen extends ConsumerWidget {
+final audioAnnouncementServiceProvider = Provider<AudioAnnouncementService>((
+  Ref ref,
+) {
+  return AudioAnnouncementService();
+});
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String? _lastAutoAnnouncementKey;
+
+  @override
+  Widget build(BuildContext context) {
     final DashboardState state = ref.watch(dashboardControllerProvider);
     final DashboardController controller = ref.read(
       dashboardControllerProvider.notifier,
@@ -42,6 +58,8 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
+    _maybeAutoAnnounce(snapshot);
+
     return RefreshIndicator(
       onRefresh: controller.load,
       child: ListView(
@@ -58,6 +76,10 @@ class HomeScreen extends ConsumerWidget {
                   onPressed: () => _onQueuePressed(
                     context: context,
                     ref: ref,
+                    request: snapshot.activeRequest,
+                  ),
+                  onListenPressed: () => _announceQueuePosition(
+                    userName: snapshot.user.fullName,
                     request: snapshot.activeRequest,
                   ),
                 ),
@@ -77,6 +99,53 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _maybeAutoAnnounce(DashboardSnapshot snapshot) {
+    final accessibilityState = ref.watch(accessibilityControllerProvider);
+
+    if (!accessibilityState.autoAnnounceQueuePosition) {
+      _lastAutoAnnouncementKey = null;
+      return;
+    }
+
+    final QueueRequest request = snapshot.activeRequest;
+    final String announcementKey =
+        '${request.id}-${request.position}-${request.status.name}-${request.lastUpdated.microsecondsSinceEpoch}';
+
+    if (_lastAutoAnnouncementKey == announcementKey) {
+      return;
+    }
+
+    _lastAutoAnnouncementKey = announcementKey;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _announceQueuePosition(
+        userName: snapshot.user.fullName,
+        request: request,
+      );
+    });
+  }
+
+  Future<void> _announceQueuePosition({
+    required String userName,
+    required QueueRequest request,
+  }) async {
+    final audioService = ref.read(audioAnnouncementServiceProvider);
+    final accessibilityState = ref.read(accessibilityControllerProvider);
+
+    await audioService.speakQueuePosition(
+      userName: userName,
+      procedure: request.procedureName,
+      hospital: request.locationName,
+      position: request.position,
+      estimatedWait: request.waitEstimate.label,
+      speechRate: accessibilityState.speechRate,
     );
   }
 

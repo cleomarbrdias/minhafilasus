@@ -141,7 +141,7 @@ class MockQueueRepository implements QueueRepository {
           title: 'Solicitação registrada',
           description: 'Pedido encaminhado para fila regulada da SES.',
           type: QueueHistoryEntryType.info,
-          occurredAt: DateTime.now().subtract(const Duration(days: 55)),
+          occurredAt: DateTime.now().subtract(const Duration(days: 50)),
         ),
       ],
       notifications: <AppNotificationItem>[

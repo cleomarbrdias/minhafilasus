@@ -10,8 +10,8 @@ class MockAuthRepository implements AuthRepository {
 
     return const AppUser(
       id: 'govbr-mock-001',
-      fullName: 'Maria Silva',
-      cpfMasked: '***.456.789-**',
+      fullName: 'Cleomar Dias',
+      cpfMasked: '***.515.791-**',
       accessLevel: 'Conta gov.br homologada',
     );
   }
