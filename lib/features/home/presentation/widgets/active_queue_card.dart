@@ -89,15 +89,15 @@ class ActiveQueueCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Espera estimada:',
+                'Espera estimada: ${request.waitEstimate.label}',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: const Color(0xFF1F2937),
                 ),
               ),
               Text(
-                '${request.waitEstimate.label} (Baseado no histórico)',
+                'A posição na fila pode mudar de acordo com critérios de prioridade clínica e regulação do atendimento.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF202A36),
+                  color: const Color.fromARGB(255, 255, 30, 0),
                 ),
               ),
               const SizedBox(height: 14),
@@ -120,7 +120,7 @@ class ActiveQueueCard extends StatelessWidget {
                     waitingValidation: waitingValidation,
                   ),
                   Text(
-                    'Atualizado em ${request.lastUpdated.toPtBrDateTime()}',
+                    ' Atualizado em ${request.lastUpdated.toPtBrDateTime()}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: const Color(0xFF607285),
                     ),

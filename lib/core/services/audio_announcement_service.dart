@@ -14,18 +14,25 @@ class AudioAnnouncementService {
     await _tts.setPitch(1.0);
   }
 
+  Future<void> speakText(String text, {double speechRate = 0.45}) async {
+    await _tts.setSpeechRate(speechRate);
+    await _tts.stop();
+    await _tts.speak(text);
+  }
+
   Future<void> speakQueuePosition({
     required String userName,
     required String procedure,
     required String hospital,
     required int position,
     required String estimatedWait,
-    required double speechRate,
+    double speechRate = 0.45,
   }) async {
-    final message =
-        'Olá, $userName. Sua posição atual é $position na fila para $procedure, no $hospital. '
-        'Tempo estimado de espera: $estimatedWait.';
+    final String message =
+        'Olá, $userName. Sua posição atual é $position na fila para '
+        '$procedure, no $hospital. Tempo estimado de espera: $estimatedWait.';
 
+    await _tts.setSpeechRate(speechRate);
     await _tts.stop();
     await _tts.speak(message);
   }

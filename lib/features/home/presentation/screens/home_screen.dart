@@ -44,7 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final snapshot = state.currentSnapshot;
+    final DashboardSnapshot? snapshot = state.currentSnapshot;
 
     if (snapshot == null) {
       return const Center(
@@ -60,6 +60,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     _maybeAutoAnnounce(snapshot);
 
+    final List<QueueRequest> activeRequests = snapshot.activeRequests;
+
     return RefreshIndicator(
       onRefresh: controller.load,
       child: ListView(
@@ -71,20 +73,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ActiveQueueCard(
-                  request: snapshot.activeRequest,
-                  onPressed: () => _onQueuePressed(
-                    context: context,
-                    ref: ref,
-                    request: snapshot.activeRequest,
-                  ),
-                  onListenPressed: () => _announceQueuePosition(
-                    userName: snapshot.user.fullName,
-                    request: snapshot.activeRequest,
-                  ),
+                SectionTitle(
+                  title: 'Minhas solicitações em andamento',
+                  subtitle: state.errorMessage,
                 ),
+                const SizedBox(height: 14),
+                if (activeRequests.isEmpty)
+                  const EmptyStateCard(
+                    icon: Icons.assignment_outlined,
+                    title: 'Nenhuma solicitação em andamento',
+                    message:
+                        'No momento você não possui procedimentos ativos para acompanhamento.',
+                  )
+                else
+                  ...activeRequests.map(
+                    (QueueRequest request) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: ActiveQueueCard(
+                        request: request,
+                        onPressed: () => _onQueuePressed(
+                          context: context,
+                          ref: ref,
+                          request: request,
+                        ),
+                        onListenPressed: () => _announceQueuePosition(
+                          userName: snapshot.user.fullName,
+                          request: request,
+                        ),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
-                SectionTitle(title: 'Históricos', subtitle: state.errorMessage),
+                SectionTitle(title: 'Históricos', subtitle: null),
                 const SizedBox(height: 14),
                 ...snapshot.history
                     .take(3)
@@ -103,16 +123,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _maybeAutoAnnounce(DashboardSnapshot snapshot) {
-    final accessibilityState = ref.watch(accessibilityControllerProvider);
+    final accessibilityState = ref.read(accessibilityControllerProvider);
 
     if (!accessibilityState.autoAnnounceQueuePosition) {
       _lastAutoAnnouncementKey = null;
       return;
     }
 
-    final QueueRequest request = snapshot.activeRequest;
-    final String announcementKey =
-        '${request.id}-${request.position}-${request.status.name}-${request.lastUpdated.microsecondsSinceEpoch}';
+    final List<QueueRequest> activeRequests = snapshot.activeRequests;
+
+    if (activeRequests.isEmpty) {
+      _lastAutoAnnouncementKey = null;
+      return;
+    }
+
+    final String announcementKey = activeRequests
+        .map(
+          (QueueRequest request) =>
+              '${request.id}-${request.position}-${request.status.name}-${request.lastUpdated.microsecondsSinceEpoch}',
+        )
+        .join('|');
 
     if (_lastAutoAnnouncementKey == announcementKey) {
       return;
@@ -120,23 +150,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     _lastAutoAnnouncementKey = announcementKey;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) {
         return;
       }
 
-      _announceQueuePosition(
+      if (activeRequests.length == 1) {
+        await _announceQueuePosition(
+          userName: snapshot.user.fullName,
+          request: activeRequests.first,
+        );
+        return;
+      }
+
+      await _announceQueueSummary(
         userName: snapshot.user.fullName,
-        request: request,
+        requests: activeRequests,
       );
     });
+  }
+
+  Future<void> _announceQueueSummary({
+    required String userName,
+    required List<QueueRequest> requests,
+  }) async {
+    final AudioAnnouncementService audioService = ref.read(
+      audioAnnouncementServiceProvider,
+    );
+    final accessibilityState = ref.read(accessibilityControllerProvider);
+
+    final StringBuffer message = StringBuffer(
+      'Olá, $userName. Você possui ${requests.length} solicitações em andamento. ',
+    );
+
+    for (final QueueRequest request in requests) {
+      message.write(
+        '${request.procedureName} em ${request.locationName}, '
+        'posição ${request.position} na fila. ',
+      );
+    }
+
+    await audioService.speakText(
+      message.toString(),
+      speechRate: accessibilityState.speechRate,
+    );
   }
 
   Future<void> _announceQueuePosition({
     required String userName,
     required QueueRequest request,
   }) async {
-    final audioService = ref.read(audioAnnouncementServiceProvider);
+    final AudioAnnouncementService audioService = ref.read(
+      audioAnnouncementServiceProvider,
+    );
     final accessibilityState = ref.read(accessibilityControllerProvider);
 
     await audioService.speakQueuePosition(
@@ -175,12 +241,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (action == ProcedureConfirmationAction.stillWaiting) {
       await ref
           .read(dashboardControllerProvider.notifier)
-          .confirmStillWaiting();
+          .confirmStillWaiting(request.id);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Você continua na fila. Status mantido com sucesso.'),
+          SnackBar(
+            content: Text(
+              'Você continua na fila de ${request.procedureName}. Status mantido com sucesso.',
+            ),
           ),
         );
       }
@@ -190,7 +258,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bool? submitted = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) => const ValidationSheet(),
+      builder: (BuildContext context) => ValidationSheet(requestId: request.id),
     );
 
     if (submitted == true && context.mounted) {

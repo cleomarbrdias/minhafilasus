@@ -30,11 +30,20 @@ class MockQueueRepository implements QueueRepository {
 
     final DashboardSnapshot current = _snapshot ?? _buildInitialSnapshot(user);
 
+    final QueueRequest? selectedRequest = _findRequestById(
+      current.activeRequests,
+      requestId,
+    );
+
+    if (selectedRequest == null) {
+      throw Exception('Solicitação não encontrada para confirmação.');
+    }
+
     final QueueHistoryEntry entry = QueueHistoryEntry(
       id: 'history-${DateTime.now().millisecondsSinceEpoch}',
       title: 'Você confirmou permanência na fila',
       description:
-          'A solicitação continua ativa para ${current.activeRequest.fullProcedureLabel}.',
+          'A solicitação continua ativa para ${selectedRequest.fullProcedureLabel}.',
       type: QueueHistoryEntryType.info,
       occurredAt: DateTime.now(),
     );
@@ -43,17 +52,25 @@ class MockQueueRepository implements QueueRepository {
       id: 'notification-${DateTime.now().millisecondsSinceEpoch}',
       title: 'Fila mantida',
       description:
-          'Sua posição continua registrada para atendimento pela rede.',
+          'Sua posição continua registrada para ${selectedRequest.fullProcedureLabel}.',
       sentAt: DateTime.now(),
       importance: NotificationImportance.info,
       isRead: false,
     );
 
+    final List<QueueRequest> updatedRequests = current.activeRequests
+        .map(
+          (QueueRequest request) => request.id == requestId
+              ? request.copyWith(
+                  status: QueueStatus.active,
+                  lastUpdated: DateTime.now(),
+                )
+              : request,
+        )
+        .toList();
+
     _snapshot = current.copyWith(
-      activeRequest: current.activeRequest.copyWith(
-        status: QueueStatus.active,
-        lastUpdated: DateTime.now(),
-      ),
+      activeRequests: updatedRequests,
       history: <QueueHistoryEntry>[entry, ...current.history],
       notifications: <AppNotificationItem>[
         notification,
@@ -74,11 +91,20 @@ class MockQueueRepository implements QueueRepository {
 
     final DashboardSnapshot current = _snapshot ?? _buildInitialSnapshot(user);
 
+    final QueueRequest? selectedRequest = _findRequestById(
+      current.activeRequests,
+      requestId,
+    );
+
+    if (selectedRequest == null) {
+      throw Exception('Solicitação não encontrada para validação.');
+    }
+
     final QueueHistoryEntry entry = QueueHistoryEntry(
       id: 'history-${DateTime.now().millisecondsSinceEpoch}',
       title: 'Informação enviada para validação',
       description:
-          '${attachments.length} anexo(s) recebido(s) para análise da SES.',
+          '${attachments.length} anexo(s) recebido(s) para análise da SES em ${selectedRequest.fullProcedureLabel}.',
       type: QueueHistoryEntryType.success,
       occurredAt: DateTime.now(),
     );
@@ -86,18 +112,27 @@ class MockQueueRepository implements QueueRepository {
     final AppNotificationItem notification = AppNotificationItem(
       id: 'notification-${DateTime.now().millisecondsSinceEpoch}',
       title: 'Validação iniciada',
-      description: 'Seu comprovante foi enviado e será verificado pela SES.',
+      description:
+          'Seu comprovante de ${selectedRequest.fullProcedureLabel} foi enviado e será verificado pela SES.',
       sentAt: DateTime.now(),
       importance: NotificationImportance.success,
       isRead: false,
     );
 
+    final List<QueueRequest> updatedRequests = current.activeRequests
+        .map(
+          (QueueRequest request) => request.id == requestId
+              ? request.copyWith(
+                  status: QueueStatus.awaitingValidation,
+                  progress: 0.92,
+                  lastUpdated: DateTime.now(),
+                )
+              : request,
+        )
+        .toList();
+
     _snapshot = current.copyWith(
-      activeRequest: current.activeRequest.copyWith(
-        status: QueueStatus.awaitingValidation,
-        progress: 0.92,
-        lastUpdated: DateTime.now(),
-      ),
+      activeRequests: updatedRequests,
       history: <QueueHistoryEntry>[entry, ...current.history],
       notifications: <AppNotificationItem>[
         notification,
@@ -108,23 +143,47 @@ class MockQueueRepository implements QueueRepository {
     return _snapshot!;
   }
 
+  QueueRequest? _findRequestById(
+    List<QueueRequest> requests,
+    String requestId,
+  ) {
+    for (final QueueRequest request in requests) {
+      if (request.id == requestId) {
+        return request;
+      }
+    }
+    return null;
+  }
+
   DashboardSnapshot _buildInitialSnapshot(AppUser user) {
     return DashboardSnapshot(
       user: user,
-      activeRequest: QueueRequest(
-        id: 'REQ-2026-0001',
-        procedureName: 'Consulta em Cardiologia',
-        locationName: 'Hospital Regional',
-        position: 54,
-        waitEstimate: const WaitEstimate(minMonths: 2, maxMonths: 3),
-        progress: 0.74,
-        status: QueueStatus.active,
-        lastUpdated: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
+      activeRequests: <QueueRequest>[
+        QueueRequest(
+          id: 'REQ-2026-0001',
+          procedureName: 'Consulta em Cardiologia',
+          locationName: 'Hospital Regional',
+          position: 54,
+          waitEstimate: const WaitEstimate(minMonths: 2, maxMonths: 3),
+          progress: 0.74,
+          status: QueueStatus.active,
+          lastUpdated: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+        QueueRequest(
+          id: 'REQ-2026-0002',
+          procedureName: 'Ressonância Magnética',
+          locationName: 'Centro de Diagnóstico por Imagem',
+          position: 18,
+          waitEstimate: const WaitEstimate(minMonths: 1, maxMonths: 2),
+          progress: 0.61,
+          status: QueueStatus.active,
+          lastUpdated: DateTime.now().subtract(const Duration(hours: 5)),
+        ),
+      ],
       history: <QueueHistoryEntry>[
         QueueHistoryEntry(
           id: 'history-001',
-          title: '54º no mês anterior',
+          title: 'Atualização de posição',
           description: 'Consulta em Cardiologia - Hospital Regional',
           type: QueueHistoryEntryType.progress,
           occurredAt: DateTime.now().subtract(const Duration(days: 20)),
@@ -132,7 +191,7 @@ class MockQueueRepository implements QueueRepository {
         QueueHistoryEntry(
           id: 'history-002',
           title: 'Atualização de estimativa',
-          description: 'Previsão ajustada para 2 a 3 meses.',
+          description: 'Ressonância Magnética - previsão entre 15 e 30 dias.',
           type: QueueHistoryEntryType.warning,
           occurredAt: DateTime.now().subtract(const Duration(days: 14)),
         ),
@@ -149,16 +208,16 @@ class MockQueueRepository implements QueueRepository {
           id: 'notification-001',
           title: 'Fila atualizada',
           description:
-              'Sua posição foi recalculada com base no histórico recente.',
+              'A posição dos seus procedimentos foi atualizada pela regulação.',
           sentAt: DateTime.now().subtract(const Duration(hours: 5)),
           importance: NotificationImportance.info,
           isRead: false,
         ),
         AppNotificationItem(
           id: 'notification-002',
-          title: 'Confirme se já realizou o procedimento',
+          title: 'Confirme sua situação na fila',
           description:
-              'Se já foi atendida por outro canal, você pode liberar a vaga.',
+              'Caso já tenha realizado algum procedimento, envie um comprovante para validação.',
           sentAt: DateTime.now().subtract(const Duration(days: 1)),
           importance: NotificationImportance.attention,
           isRead: false,

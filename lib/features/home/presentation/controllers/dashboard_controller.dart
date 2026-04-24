@@ -67,6 +67,7 @@ final attachmentPickerServiceProvider = Provider<AttachmentPickerService>((
 final dashboardControllerProvider =
     StateNotifierProvider<DashboardController, DashboardState>((Ref ref) {
       final AppUser? user = ref.watch(authControllerProvider).user;
+
       return DashboardController(
         queueRepository: ref.watch(queueRepositoryProvider),
         currentUser: user,
@@ -149,7 +150,7 @@ class DashboardController extends StateNotifier<DashboardState> {
     );
   }
 
-  Future<void> confirmStillWaiting() async {
+  Future<void> confirmStillWaiting(String requestId) async {
     final DashboardSnapshot? snapshot = state.currentSnapshot;
 
     if (_currentUser == null || snapshot == null) {
@@ -160,10 +161,7 @@ class DashboardController extends StateNotifier<DashboardState> {
 
     try {
       final DashboardSnapshot updatedSnapshot = await _queueRepository
-          .confirmStillWaiting(
-            user: _currentUser,
-            requestId: snapshot.activeRequest.id,
-          );
+          .confirmStillWaiting(user: _currentUser, requestId: requestId);
 
       state = state.copyWith(
         isSubmitting: false,
@@ -178,7 +176,7 @@ class DashboardController extends StateNotifier<DashboardState> {
     }
   }
 
-  Future<bool> submitProcedureAlreadyDone() async {
+  Future<bool> submitProcedureAlreadyDone(String requestId) async {
     final DashboardSnapshot? snapshot = state.currentSnapshot;
 
     if (_currentUser == null || snapshot == null) {
@@ -198,7 +196,7 @@ class DashboardController extends StateNotifier<DashboardState> {
       final DashboardSnapshot updatedSnapshot = await _queueRepository
           .submitProcedureAlreadyDone(
             user: _currentUser,
-            requestId: snapshot.activeRequest.id,
+            requestId: requestId,
             attachments: state.draftAttachments,
           );
 

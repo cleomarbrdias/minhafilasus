@@ -7,7 +7,9 @@ import 'package:minhafilasaude/features/home/domain/models/validation_attachment
 import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_controller.dart';
 
 class ValidationSheet extends ConsumerWidget {
-  const ValidationSheet({super.key});
+  const ValidationSheet({super.key, required this.requestId});
+
+  final String requestId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -126,7 +128,7 @@ class ValidationSheet extends ConsumerWidget {
                   ? null
                   : () async {
                       final bool success = await controller
-                          .submitProcedureAlreadyDone();
+                          .submitProcedureAlreadyDone(requestId);
 
                       if (success && context.mounted) {
                         Navigator.of(context).pop(true);
