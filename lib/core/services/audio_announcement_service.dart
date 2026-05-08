@@ -20,6 +20,18 @@ class AudioAnnouncementService {
     await _tts.speak(text);
   }
 
+  Future<void> speakNotification({
+    required String title,
+    required String description,
+    double speechRate = 0.45,
+  }) async {
+    final String message = '$title. $description.';
+
+    await _tts.setSpeechRate(speechRate);
+    await _tts.stop();
+    await _tts.speak(message);
+  }
+
   Future<void> speakQueuePosition({
     required String userName,
     required String procedure,
@@ -39,5 +51,19 @@ class AudioAnnouncementService {
 
   Future<void> stop() async {
     await _tts.stop();
+  }
+
+  Future<void> speakHistoryEntry({
+    required String title,
+    required String description,
+    required String dateLabel,
+    double speechRate = 0.45,
+  }) async {
+    final String message =
+        '$title. $description. Data do registro: $dateLabel.';
+
+    await _tts.setSpeechRate(speechRate);
+    await _tts.stop();
+    await _tts.speak(message);
   }
 }

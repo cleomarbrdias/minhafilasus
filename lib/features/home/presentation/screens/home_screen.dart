@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/core/services/audio_announcement_service.dart';
 
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/core/widgets/empty_state_card.dart';
 import 'package:minhafilasaude/features/home/domain/models/dashboard_snapshot.dart';
+import 'package:minhafilasaude/features/home/domain/models/queue_history_entry.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_request.dart';
 import 'package:minhafilasaude/features/home/presentation/controllers/accessibility_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_controller.dart';
@@ -55,6 +57,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             message: 'Faça login novamente ou tente atualizar os dados.',
           ),
         ),
+      );
+    }
+    Future<void> _announceHistoryEntry(QueueHistoryEntry entry) async {
+      final audioService = ref.read(audioAnnouncementServiceProvider);
+      final accessibilityState = ref.read(accessibilityControllerProvider);
+
+      await audioService.speakHistoryEntry(
+        title: entry.title,
+        description: entry.description,
+        dateLabel: entry.occurredAt.toShortLabel(),
+        speechRate: accessibilityState.speechRate,
       );
     }
 
@@ -111,7 +124,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     .map(
                       (entry) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: HistoryEntryCard(entry: entry),
+                        child: HistoryEntryCard(
+                          entry: entry,
+                          onPlayPressed: () => _announceHistoryEntry(entry),
+                        ),
                       ),
                     ),
               ],

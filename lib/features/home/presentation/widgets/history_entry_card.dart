@@ -4,9 +4,16 @@ import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_history_entry.dart';
 
 class HistoryEntryCard extends StatelessWidget {
-  const HistoryEntryCard({super.key, required this.entry});
+  const HistoryEntryCard({
+    super.key,
+    required this.entry,
+    this.onTap,
+    this.onPlayPressed,
+  });
 
   final QueueHistoryEntry entry;
+  final VoidCallback? onTap;
+  final VoidCallback? onPlayPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +21,13 @@ class HistoryEntryCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         leading: Container(
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: visual.color.withOpacity(0.14),
+            color: visual.color.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(visual.icon, color: visual.color),
@@ -36,7 +44,14 @@ class HistoryEntryCard extends StatelessWidget {
             '${entry.description}\n${entry.occurredAt.toShortLabel()}',
           ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded),
+        trailing: IconButton(
+          tooltip: 'Ouvir histórico',
+          onPressed: onPlayPressed,
+          icon: Icon(
+            Icons.volume_up_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
       ),
     );
   }
