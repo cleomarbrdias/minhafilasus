@@ -13,6 +13,9 @@ class MinhaFilaSaudeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    // O app observa o estado global de acessibilidade.
+    // Como o controller agora carrega preferências salvas automaticamente,
+    // o tema e a escala de texto passam a respeitar o último ajuste do usuário.
     final accessibilityState = ref.watch(accessibilityControllerProvider);
 
     return MaterialApp.router(

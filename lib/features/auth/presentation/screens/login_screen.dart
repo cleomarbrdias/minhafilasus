@@ -7,12 +7,26 @@ import 'package:minhafilasaude/app/theme/app_theme.dart';
 import 'package:minhafilasaude/core/widgets/app_brand_mark.dart';
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:minhafilasaude/features/auth/presentation/widgets/accessibility_onboarding_sheet.dart';
+import 'package:minhafilasaude/features/home/presentation/controllers/accessibility_controller.dart';
 
-class LoginScreen extends ConsumerWidget {
+/// Tela de entrada do aplicativo.
+///
+/// Nesta versão, ela também é responsável por abrir automaticamente o
+/// onboarding inicial de acessibilidade quando o usuário entra pela primeira vez.
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  /// Evita múltiplas aberturas do onboarding na mesma construção da tela.
+  bool _hasRequestedOnboarding = false;
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<AuthState>(authControllerProvider, (
       AuthState? previous,
       AuthState next,
@@ -32,7 +46,33 @@ class LoginScreen extends ConsumerWidget {
     });
 
     final AuthState state = ref.watch(authControllerProvider);
+    final AccessibilityState accessibilityState = ref.watch(
+      accessibilityControllerProvider,
+    );
     final ThemeData theme = Theme.of(context);
+
+    // Abre o onboarding apenas depois que as preferências forem carregadas.
+    if (accessibilityState.preferencesHydrated &&
+        !accessibilityState.onboardingCompleted &&
+        !_hasRequestedOnboarding) {
+      _hasRequestedOnboarding = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) {
+          return;
+        }
+
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          isDismissible: false,
+          enableDrag: false,
+          builder: (BuildContext context) {
+            return const AccessibilityOnboardingSheet();
+          },
+        );
+      });
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -73,6 +113,10 @@ class LoginScreen extends ConsumerWidget {
                         : 'Modo demonstração',
                   ),
                   const _InfoChip(
+                    icon: Icons.accessibility_new_rounded,
+                    label: 'Acessibilidade configurável',
+                  ),
+                  const _InfoChip(
                     icon: Icons.shield_outlined,
                     label: 'Validação pela SES',
                   ),
@@ -111,6 +155,23 @@ class LoginScreen extends ConsumerWidget {
                           'modo mock para facilitar a defesa e a demonstração.',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+
+              // Botão opcional para reabrir manualmente o onboarding
+              // caso o usuário queira revisar as escolhas antes do login.
+              TextButton.icon(
+                onPressed: () async {
+                  await showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return const AccessibilityOnboardingSheet();
+                    },
+                  );
+                },
+                icon: const Icon(Icons.tune_rounded),
+                label: const Text('Configurar acessibilidade'),
               ),
               const Spacer(),
             ],
