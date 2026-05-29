@@ -618,6 +618,6 @@ Defina aqui a licença que deseja utilizar, por exemplo:
 
 ## Autor
 
-**Seu nome aqui**  
-Curso / Instituição  
+Cleomar Dias da Função  
+Transformação Digital no SUS / FIOCRUZ  
 Projeto de TCC — MinhaFila Saúde
