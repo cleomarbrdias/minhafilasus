@@ -6,6 +6,7 @@ class AccessibilityState {
     required this.autoAnnounceQueuePosition,
     required this.speechRate,
     required this.highContrastEnabled,
+    required this.colorBlindAssistEnabled,
     required this.textScaleFactor,
   });
 
@@ -13,17 +14,20 @@ class AccessibilityState {
     : autoAnnounceQueuePosition = false,
       speechRate = 0.45,
       highContrastEnabled = false,
+      colorBlindAssistEnabled = false,
       textScaleFactor = 1.0;
 
   final bool autoAnnounceQueuePosition;
   final double speechRate;
   final bool highContrastEnabled;
+  final bool colorBlindAssistEnabled;
   final double textScaleFactor;
 
   AccessibilityState copyWith({
     bool? autoAnnounceQueuePosition,
     double? speechRate,
     bool? highContrastEnabled,
+    bool? colorBlindAssistEnabled,
     double? textScaleFactor,
   }) {
     return AccessibilityState(
@@ -31,6 +35,8 @@ class AccessibilityState {
           autoAnnounceQueuePosition ?? this.autoAnnounceQueuePosition,
       speechRate: speechRate ?? this.speechRate,
       highContrastEnabled: highContrastEnabled ?? this.highContrastEnabled,
+      colorBlindAssistEnabled:
+          colorBlindAssistEnabled ?? this.colorBlindAssistEnabled,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
     );
   }
@@ -56,6 +62,10 @@ class AccessibilityController extends StateNotifier<AccessibilityState> {
 
   void setHighContrastEnabled(bool value) {
     state = state.copyWith(highContrastEnabled: value);
+  }
+
+  void setColorBlindAssistEnabled(bool value) {
+    state = state.copyWith(colorBlindAssistEnabled: value);
   }
 
   void setTextScaleFactor(double value) {

@@ -20,6 +20,7 @@ class MinhaFilaSaudeApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(
         highContrast: accessibilityState.highContrastEnabled,
+        colorBlindAssist: accessibilityState.colorBlindAssistEnabled,
       ),
       builder: (BuildContext context, Widget? child) {
         final MediaQueryData mediaQuery = MediaQuery.of(context);

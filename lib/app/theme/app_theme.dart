@@ -5,37 +5,61 @@ class AppTheme {
 
   static const Color _seed = Color(0xFF0E5AA7);
   static const Color govBrBlue = Color(0xFF003B7A);
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFB26A00);
 
-  static ThemeData light({bool highContrast = false}) {
+  static ThemeData light({
+    bool highContrast = false,
+    bool colorBlindAssist = false,
+  }) {
     final Color background = highContrast
         ? const Color(0xFFF2F4F7)
-        : const Color(0xFFF6F8FB);
+        : (colorBlindAssist ? const Color(0xFFF4F7FA) : const Color(0xFFF6F8FB));
     final Color surface = Colors.white;
     final Color textPrimary = highContrast
         ? const Color(0xFF0A0A0A)
-        : const Color(0xFF10243E);
+        : (colorBlindAssist ? const Color(0xFF0F172A) : const Color(0xFF10243E));
     final Color textSecondary = highContrast
         ? const Color(0xFF202020)
-        : const Color(0xFF4D5E72);
+        : (colorBlindAssist ? const Color(0xFF475569) : const Color(0xFF4D5E72));
     final Color outline = highContrast
         ? const Color(0xFF475467)
-        : const Color(0xFFE4EAF2);
+        : (colorBlindAssist ? const Color(0xFFCBD5E1) : const Color(0xFFE4EAF2));
+
+    final Color primary = colorBlindAssist
+        ? const Color(0xFF3F51B5)
+        : (highContrast ? const Color(0xFF003B7A) : _seed);
+    final Color success = colorBlindAssist
+        ? const Color(0xFF00796B)
+        : const Color(0xFF2E7D32);
+    final Color warning = colorBlindAssist
+        ? const Color(0xFF8E24AA)
+        : const Color(0xFFB26A00);
     final Color indicator = highContrast
         ? const Color(0xFFD7E7FA)
-        : _seed.withValues(alpha: 0.14);
+        : (colorBlindAssist
+            ? const Color(0xFFDCEAFE)
+            : primary.withValues(alpha: 0.14));
 
     final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: _seed,
+      seedColor: primary,
       brightness: Brightness.light,
     ).copyWith(
-      primary: highContrast ? const Color(0xFF003B7A) : _seed,
+      primary: primary,
       secondary: success,
       tertiary: warning,
       surface: surface,
-      error: const Color(0xFFB42318),
+      error: highContrast ? const Color(0xFF8B0000) : const Color(0xFFB42318),
       onSurface: textPrimary,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onTertiary: Colors.white,
+      outline: outline,
+      outlineVariant: outline,
+      surfaceContainerHighest: colorBlindAssist
+          ? const Color(0xFFE6EEF9)
+          : const Color(0xFFEAF2FB),
+      surfaceContainer: colorBlindAssist
+          ? const Color(0xFFF1F5F9)
+          : const Color(0xFFF4F7FB),
     );
 
     return ThemeData(
@@ -62,6 +86,27 @@ class AppTheme {
           },
         ),
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white;
+          }
+          return null;
+        }),
+        trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorBlindAssist ? scheme.tertiary : scheme.secondary;
+          }
+          return null;
+        }),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: colorBlindAssist ? scheme.tertiary : scheme.primary,
+        thumbColor: colorBlindAssist ? scheme.tertiary : scheme.primary,
+        overlayColor: (colorBlindAssist ? scheme.tertiary : scheme.primary)
+            .withValues(alpha: 0.12),
+        inactiveTrackColor: scheme.outlineVariant.withValues(alpha: 0.5),
+      ),
       cardTheme: CardThemeData(
         color: Colors.white,
         surfaceTintColor: Colors.transparent,
@@ -71,7 +116,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
             color: highContrast ? const Color(0xFF1D2939) : outline,
-            width: highContrast ? 1.4 : 0.8,
+            width: highContrast ? 1.4 : 1.1,
           ),
         ),
       ),
@@ -161,4 +206,17 @@ class AppTheme {
       ),
     );
   }
+
+  static Color successColorOf(BuildContext context) =>
+      Theme.of(context).colorScheme.secondary;
+
+  static Color warningColorOf(BuildContext context) =>
+      Theme.of(context).colorScheme.tertiary;
+
+  static Color infoColorOf(BuildContext context) =>
+      Theme.of(context).colorScheme.primary;
+
+  static Color neutralColorOf(BuildContext context) =>
+      Theme.of(context).textTheme.bodyMedium?.color ??
+      const Color(0xFF6B7E90);
 }

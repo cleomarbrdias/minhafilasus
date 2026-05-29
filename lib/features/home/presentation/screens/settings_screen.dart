@@ -108,6 +108,16 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const Divider(height: 1),
                   SwitchListTile.adaptive(
+                    secondary: const Icon(Icons.visibility_rounded),
+                    title: const Text('Ativar modo daltônico'),
+                    subtitle: const Text(
+                      'Ajusta a paleta para facilitar a distinção entre status, avisos e elementos informativos.',
+                    ),
+                    value: accessibilityState.colorBlindAssistEnabled,
+                    onChanged: accessibilityController.setColorBlindAssistEnabled,
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile.adaptive(
                     secondary: const Icon(Icons.record_voice_over_rounded),
                     title: const Text('Ler posição da fila automaticamente'),
                     subtitle: const Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:minhafilasaude/app/theme/app_theme.dart';
 import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_history_entry.dart';
 
@@ -17,7 +18,7 @@ class HistoryEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _HistoryVisual visual = _resolveVisual(entry.type);
+    final _HistoryVisual visual = _resolveVisual(context, entry.type);
 
     return Card(
       child: ListTile(
@@ -56,27 +57,30 @@ class HistoryEntryCard extends StatelessWidget {
     );
   }
 
-  _HistoryVisual _resolveVisual(QueueHistoryEntryType type) {
+  _HistoryVisual _resolveVisual(
+    BuildContext context,
+    QueueHistoryEntryType type,
+  ) {
     switch (type) {
       case QueueHistoryEntryType.progress:
-        return const _HistoryVisual(
+        return _HistoryVisual(
           icon: Icons.favorite_rounded,
-          color: Color(0xFF2B6CB0),
+          color: AppTheme.infoColorOf(context),
         );
       case QueueHistoryEntryType.warning:
-        return const _HistoryVisual(
+        return _HistoryVisual(
           icon: Icons.warning_amber_rounded,
-          color: Color(0xFFD99025),
+          color: AppTheme.warningColorOf(context),
         );
       case QueueHistoryEntryType.success:
-        return const _HistoryVisual(
+        return _HistoryVisual(
           icon: Icons.check_circle_outline_rounded,
-          color: Color(0xFF3E9B52),
+          color: AppTheme.successColorOf(context),
         );
       case QueueHistoryEntryType.info:
-        return const _HistoryVisual(
+        return _HistoryVisual(
           icon: Icons.schedule_rounded,
-          color: Color(0xFF6B7E90),
+          color: AppTheme.neutralColorOf(context),
         );
     }
   }

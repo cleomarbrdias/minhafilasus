@@ -22,6 +22,8 @@ class ActiveQueueCard extends StatelessWidget {
     final ColorScheme scheme = theme.colorScheme;
     final bool waitingValidation =
         request.status == QueueStatus.awaitingValidation;
+
+    final Color activeQueueColor = AppTheme.infoColorOf(context);
     final String semanticsLabel =
         'Fila ativa. Procedimento ${request.procedureName}, na unidade '
         '${request.locationName}. Sua posição atual é ${request.position} '
@@ -43,7 +45,7 @@ class ActiveQueueCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.08),
+                  color: activeQueueColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -55,10 +57,7 @@ class ActiveQueueCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: scheme.primary,
-                    ),
+                    Icon(Icons.chevron_right_rounded, color: activeQueueColor),
                   ],
                 ),
               ),
@@ -85,7 +84,7 @@ class ActiveQueueCard extends StatelessWidget {
                     child: Text(
                       'na fila',
                       style: theme.textTheme.headlineSmall?.copyWith(
-                        color: AppTheme.success,
+                        color: activeQueueColor,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -182,7 +181,9 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = waitingValidation ? AppTheme.warning : AppTheme.success;
+    final Color color = waitingValidation
+        ? AppTheme.warningColorOf(context)
+        : AppTheme.infoColorOf(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:minhafilasaude/app/theme/app_theme.dart';
 import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/features/home/domain/models/app_notification_item.dart';
 
@@ -17,7 +18,10 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _NotificationVisual visual = _resolveVisual(notification.importance);
+    final _NotificationVisual visual = _resolveVisual(
+      context,
+      notification.importance,
+    );
     final ThemeData theme = Theme.of(context);
 
     return Card(
@@ -63,22 +67,25 @@ class NotificationCard extends StatelessWidget {
     );
   }
 
-  _NotificationVisual _resolveVisual(NotificationImportance importance) {
+  _NotificationVisual _resolveVisual(
+    BuildContext context,
+    NotificationImportance importance,
+  ) {
     switch (importance) {
       case NotificationImportance.info:
-        return const _NotificationVisual(
+        return _NotificationVisual(
           icon: Icons.notifications_none_rounded,
-          color: Color(0xFF2B6CB0),
+          color: AppTheme.infoColorOf(context),
         );
       case NotificationImportance.attention:
-        return const _NotificationVisual(
+        return _NotificationVisual(
           icon: Icons.notification_important_rounded,
-          color: Color(0xFFB26A00),
+          color: AppTheme.warningColorOf(context),
         );
       case NotificationImportance.success:
-        return const _NotificationVisual(
+        return _NotificationVisual(
           icon: Icons.check_circle_outline_rounded,
-          color: Color(0xFF2E7D32),
+          color: AppTheme.successColorOf(context),
         );
     }
   }
