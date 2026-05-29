@@ -18,6 +18,7 @@ class NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _NotificationVisual visual = _resolveVisual(notification.importance);
+    final ThemeData theme = Theme.of(context);
 
     return Card(
       child: ListTile(
@@ -34,7 +35,7 @@ class NotificationCard extends StatelessWidget {
         ),
         title: Text(
           notification.title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: notification.isRead ? FontWeight.w600 : FontWeight.w700,
           ),
         ),
@@ -45,12 +46,16 @@ class NotificationCard extends StatelessWidget {
           ),
         ),
         trailing: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
           child: IconButton(
             tooltip: 'Ouvir notificação',
             onPressed: onPlayPressed,
             icon: Icon(
               Icons.volume_up_rounded,
-              color: Theme.of(context).colorScheme.primary,
+              color: theme.colorScheme.primary,
             ),
           ),
         ),
@@ -68,19 +73,22 @@ class NotificationCard extends StatelessWidget {
       case NotificationImportance.attention:
         return const _NotificationVisual(
           icon: Icons.notification_important_rounded,
-          color: Color(0xFFD99025),
+          color: Color(0xFFB26A00),
         );
       case NotificationImportance.success:
         return const _NotificationVisual(
           icon: Icons.check_circle_outline_rounded,
-          color: Color(0xFF3E9B52),
+          color: Color(0xFF2E7D32),
         );
     }
   }
 }
 
 class _NotificationVisual {
-  const _NotificationVisual({required this.icon, required this.color});
+  const _NotificationVisual({
+    required this.icon,
+    required this.color,
+  });
 
   final IconData icon;
   final Color color;

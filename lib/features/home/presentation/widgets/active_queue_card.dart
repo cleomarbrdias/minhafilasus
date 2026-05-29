@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:minhafilasaude/app/theme/app_theme.dart';
 import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_request.dart';
 
@@ -18,6 +19,7 @@ class ActiveQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme scheme = theme.colorScheme;
     final bool waitingValidation =
         request.status == QueueStatus.awaitingValidation;
     final String semanticsLabel =
@@ -41,19 +43,22 @@ class ActiveQueueCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2F5FA),
+                  color: scheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: <Widget>[
                     Text(
-                      'Fila Ativa',
+                      'Fila ativa',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontSize: 16,
                       ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.chevron_right_rounded),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: scheme.primary,
+                    ),
                   ],
                 ),
               ),
@@ -71,16 +76,16 @@ class ActiveQueueCard extends StatelessWidget {
                     request.positionLabel,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontSize: 56,
-                      color: theme.colorScheme.primary,
+                      color: scheme.primary,
                       height: 0.9,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'na Fila',
+                      'na fila',
                       style: theme.textTheme.headlineSmall?.copyWith(
-                        color: const Color(0xFF56A15D),
+                        color: AppTheme.success,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -89,16 +94,29 @@ class ActiveQueueCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Espera estimada: ${request.waitEstimate.label}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF1F2937),
-                ),
+                'Estimativa aproximada: ${request.waitEstimate.label}',
+                style: theme.textTheme.bodyLarge,
               ),
-              Text(
-                'A posição na fila pode mudar de acordo com critérios de prioridade clínica e regulação do atendimento.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: const Color.fromARGB(255, 255, 30, 0),
-                ),
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 18,
+                    color: scheme.error,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'A posição pode mudar conforme critérios de prioridade clínica e regulação do atendimento.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
               ClipRRect(
@@ -106,7 +124,7 @@ class ActiveQueueCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: request.progress,
                   minHeight: 10,
-                  backgroundColor: const Color(0xFFE7EDF4),
+                  backgroundColor: scheme.primary.withValues(alpha: 0.12),
                 ),
               ),
               const SizedBox(height: 14),
@@ -120,10 +138,8 @@ class ActiveQueueCard extends StatelessWidget {
                     waitingValidation: waitingValidation,
                   ),
                   Text(
-                    ' Atualizado em ${request.lastUpdated.toPtBrDateTime()}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF607285),
-                    ),
+                    'Atualizado em ${request.lastUpdated.toPtBrDateTime()}',
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
               ),
@@ -166,14 +182,12 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = waitingValidation
-        ? const Color(0xFFE7A741)
-        : const Color(0xFF4D9C5C);
+    final Color color = waitingValidation ? AppTheme.warning : AppTheme.success;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.14),
+        color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(

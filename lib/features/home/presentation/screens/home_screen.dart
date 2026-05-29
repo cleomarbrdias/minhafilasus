@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minhafilasaude/core/extensions/date_extensions.dart';
-import 'package:minhafilasaude/core/services/audio_announcement_service.dart';
 
+import 'package:minhafilasaude/core/providers/audio_announcement_provider.dart';
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/core/widgets/empty_state_card.dart';
 import 'package:minhafilasaude/features/home/domain/models/dashboard_snapshot.dart';
@@ -18,12 +18,6 @@ import 'package:minhafilasaude/features/home/presentation/widgets/history_entry_
 import 'package:minhafilasaude/features/home/presentation/widgets/procedure_confirmation_sheet.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/section_title.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/validation_sheet.dart';
-
-final audioAnnouncementServiceProvider = Provider<AudioAnnouncementService>((
-  Ref ref,
-) {
-  return AudioAnnouncementService();
-});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -57,17 +51,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             message: 'Faça login novamente ou tente atualizar os dados.',
           ),
         ),
-      );
-    }
-    Future<void> _announceHistoryEntry(QueueHistoryEntry entry) async {
-      final audioService = ref.read(audioAnnouncementServiceProvider);
-      final accessibilityState = ref.read(accessibilityControllerProvider);
-
-      await audioService.speakHistoryEntry(
-        title: entry.title,
-        description: entry.description,
-        dateLabel: entry.occurredAt.toShortLabel(),
-        speechRate: accessibilityState.speechRate,
       );
     }
 
@@ -117,12 +100,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 const SizedBox(height: 24),
-                SectionTitle(title: 'Históricos', subtitle: null),
+                const SectionTitle(title: 'Históricos'),
                 const SizedBox(height: 14),
                 ...snapshot.history
                     .take(3)
                     .map(
-                      (entry) => Padding(
+                      (QueueHistoryEntry entry) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: HistoryEntryCard(
                           entry: entry,
@@ -190,9 +173,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String userName,
     required List<QueueRequest> requests,
   }) async {
-    final AudioAnnouncementService audioService = ref.read(
-      audioAnnouncementServiceProvider,
-    );
+    final audioService = ref.read(audioAnnouncementServiceProvider);
     final accessibilityState = ref.read(accessibilityControllerProvider);
 
     final StringBuffer message = StringBuffer(
@@ -216,9 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String userName,
     required QueueRequest request,
   }) async {
-    final AudioAnnouncementService audioService = ref.read(
-      audioAnnouncementServiceProvider,
-    );
+    final audioService = ref.read(audioAnnouncementServiceProvider);
     final accessibilityState = ref.read(accessibilityControllerProvider);
 
     await audioService.speakQueuePosition(
@@ -227,6 +206,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       hospital: request.locationName,
       position: request.position,
       estimatedWait: request.waitEstimate.label,
+      speechRate: accessibilityState.speechRate,
+    );
+  }
+
+  Future<void> _announceHistoryEntry(QueueHistoryEntry entry) async {
+    final audioService = ref.read(audioAnnouncementServiceProvider);
+    final accessibilityState = ref.read(accessibilityControllerProvider);
+
+    await audioService.speakHistoryEntry(
+      title: entry.title,
+      description: entry.description,
+      dateLabel: entry.occurredAt.toShortLabel(),
       speechRate: accessibilityState.speechRate,
     );
   }

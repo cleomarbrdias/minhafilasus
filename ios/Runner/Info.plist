@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<key>NSCameraUsageDescription</key>
+<string>Este aplicativo precisa acessar a câmera para fotografar o laudo médico.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Este aplicativo precisa acessar suas fotos para anexar comprovantes e laudos.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

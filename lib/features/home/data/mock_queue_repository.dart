@@ -174,7 +174,7 @@ class MockQueueRepository implements QueueRepository {
           procedureName: 'Ressonância Magnética',
           locationName: 'Centro de Diagnóstico por Imagem',
           position: 18,
-          waitEstimate: const WaitEstimate(minMonths: 1, maxMonths: 2),
+          waitEstimate: const WaitEstimate(minMonths: 1, maxMonths: 1, additionalDays: 15),
           progress: 0.61,
           status: QueueStatus.active,
           lastUpdated: DateTime.now().subtract(const Duration(hours: 5)),

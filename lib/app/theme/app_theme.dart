@@ -5,51 +5,75 @@ class AppTheme {
 
   static const Color _seed = Color(0xFF0E5AA7);
   static const Color govBrBlue = Color(0xFF003B7A);
-  static const Color success = Color(0xFF3E9B52);
-  static const Color warning = Color(0xFFE7A741);
-  static const Color background = Color(0xFFF6F8FB);
-  static const Color surface = Colors.white;
+  static const Color success = Color(0xFF2E7D32);
+  static const Color warning = Color(0xFFB26A00);
 
-  static ThemeData light() {
+  static ThemeData light({bool highContrast = false}) {
+    final Color background = highContrast
+        ? const Color(0xFFF2F4F7)
+        : const Color(0xFFF6F8FB);
+    final Color surface = Colors.white;
+    final Color textPrimary = highContrast
+        ? const Color(0xFF0A0A0A)
+        : const Color(0xFF10243E);
+    final Color textSecondary = highContrast
+        ? const Color(0xFF202020)
+        : const Color(0xFF4D5E72);
+    final Color outline = highContrast
+        ? const Color(0xFF475467)
+        : const Color(0xFFE4EAF2);
+    final Color indicator = highContrast
+        ? const Color(0xFFD7E7FA)
+        : _seed.withValues(alpha: 0.14);
+
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: _seed,
       brightness: Brightness.light,
     ).copyWith(
-      primary: _seed,
-      secondary: const Color(0xFF47A874),
+      primary: highContrast ? const Color(0xFF003B7A) : _seed,
+      secondary: success,
       tertiary: warning,
       surface: surface,
+      error: const Color(0xFFB42318),
+      onSurface: textPrimary,
     );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: background,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: Color(0xFF10243E),
+        foregroundColor: textPrimary,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: _seed.withOpacity(0.14),
+        indicatorColor: indicator,
         labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>(
           (Set<WidgetState> states) {
             final bool selected = states.contains(WidgetState.selected);
             return TextStyle(
               fontSize: 12,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? _seed : const Color(0xFF637387),
+              color: selected ? scheme.primary : textSecondary,
             );
           },
         ),
       ),
-      cardTheme: const CardThemeData(
+      cardTheme: CardThemeData(
         color: Colors.white,
         surfaceTintColor: Colors.transparent,
-        elevation: 1.5,
+        elevation: highContrast ? 0 : 1.5,
         margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: highContrast ? const Color(0xFF1D2939) : outline,
+            width: highContrast ? 1.4 : 0.8,
+          ),
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -70,7 +94,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(18),
           ),
           side: BorderSide(
-            color: scheme.outlineVariant,
+            color: highContrast ? const Color(0xFF344054) : scheme.outlineVariant,
           ),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w700,
@@ -78,9 +102,9 @@ class AppTheme {
           ),
         ),
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         thickness: 0.8,
-        color: Color(0xFFE4EAF2),
+        color: outline,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -88,36 +112,51 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
         ),
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineLarge: TextStyle(
           fontSize: 34,
           fontWeight: FontWeight.w800,
-          color: Color(0xFF10243E),
+          color: textPrimary,
         ),
         headlineMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w800,
-          color: Color(0xFF10243E),
+          color: textPrimary,
+        ),
+        headlineSmall: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: textPrimary,
         ),
         titleLarge: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w800,
-          color: Color(0xFF10243E),
+          color: textPrimary,
         ),
         titleMedium: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF10243E),
+          color: textPrimary,
+        ),
+        titleSmall: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: textPrimary,
         ),
         bodyLarge: TextStyle(
           fontSize: 16,
-          height: 1.4,
-          color: Color(0xFF243649),
+          height: 1.45,
+          color: textPrimary,
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
+          height: 1.5,
+          color: textSecondary,
+        ),
+        bodySmall: TextStyle(
+          fontSize: 12,
           height: 1.45,
-          color: Color(0xFF4D5E72),
+          color: textSecondary,
         ),
       ),
     );

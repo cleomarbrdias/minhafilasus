@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:minhafilasaude/app/config/app_config.dart';
+import 'package:minhafilasaude/core/extensions/date_extensions.dart';
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/controllers/accessibility_controller.dart';
-import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/section_title.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -28,7 +28,7 @@ class SettingsScreen extends ConsumerWidget {
             const SectionTitle(
               title: 'Ajustes',
               subtitle:
-                  'Informações de ambiente, integração, sessão atual e acessibilidade.',
+                  'Informações de ambiente, sessão atual e recursos de acessibilidade.',
             ),
             const SizedBox(height: 20),
             Card(
@@ -39,6 +39,14 @@ class SettingsScreen extends ConsumerWidget {
                     title:
                         authState.user?.fullName ?? 'Usuário não autenticado',
                     subtitle: authState.user?.cpfMasked ?? '',
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.schedule_rounded,
+                    title: 'Último acesso nesta sessão',
+                    subtitle: authState.sessionStartedAt == null
+                        ? 'Nenhum acesso registrado'
+                        : authState.sessionStartedAt!.toPtBrDateTime(),
                   ),
                   const Divider(height: 1),
                   _SettingsTile(
@@ -70,6 +78,36 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 children: <Widget>[
                   SwitchListTile.adaptive(
+                    secondary: const Icon(Icons.contrast_rounded),
+                    title: const Text('Ativar alto contraste'),
+                    subtitle: const Text(
+                      'Aumenta a distinção entre textos, ícones e componentes para facilitar a leitura.',
+                    ),
+                    value: accessibilityState.highContrastEnabled,
+                    onChanged: accessibilityController.setHighContrastEnabled,
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.format_size_rounded),
+                    title: const Text('Tamanho do texto'),
+                    subtitle: Text(
+                      'Escala atual: ${(accessibilityState.textScaleFactor * 100).round()}%',
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Slider(
+                      min: 1.0,
+                      max: 1.6,
+                      divisions: 6,
+                      value: accessibilityState.textScaleFactor,
+                      label:
+                          '${(accessibilityState.textScaleFactor * 100).round()}%',
+                      onChanged: accessibilityController.setTextScaleFactor,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile.adaptive(
                     secondary: const Icon(Icons.record_voice_over_rounded),
                     title: const Text('Ler posição da fila automaticamente'),
                     subtitle: const Text(
@@ -90,10 +128,10 @@ class SettingsScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     child: Slider(
-                      value: accessibilityState.speechRate,
-                      min: 0.3,
+                      min: 0.30,
                       max: 0.65,
                       divisions: 7,
+                      value: accessibilityState.speechRate,
                       label: accessibilityState.speechRate.toStringAsFixed(2),
                       onChanged: accessibilityController.setSpeechRate,
                     ),
@@ -105,14 +143,12 @@ class SettingsScreen extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () async {
                 await ref.read(authControllerProvider.notifier).signOut();
-                ref.invalidate(dashboardControllerProvider);
-
                 if (context.mounted) {
                   context.go('/');
                 }
               },
               icon: const Icon(Icons.logout_rounded),
-              label: const Text('Sair'),
+              label: const Text('Encerrar sessão'),
             ),
           ],
         ),
@@ -137,7 +173,7 @@ class _SettingsTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
-      subtitle: Text(subtitle),
+      subtitle: subtitle.isEmpty ? null : Text(subtitle),
     );
   }
 }

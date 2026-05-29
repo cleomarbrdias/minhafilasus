@@ -10,16 +10,23 @@ import 'package:minhafilasaude/features/auth/domain/repositories/auth_repository
 enum AuthStatus { unauthenticated, authenticating, authenticated, failure }
 
 class AuthState {
-  const AuthState({required this.status, this.user, this.errorMessage});
+  const AuthState({
+    required this.status,
+    this.user,
+    this.errorMessage,
+    this.sessionStartedAt,
+  });
 
   const AuthState.unauthenticated()
     : status = AuthStatus.unauthenticated,
       user = null,
-      errorMessage = null;
+      errorMessage = null,
+      sessionStartedAt = null;
 
   final AuthStatus status;
   final AppUser? user;
   final String? errorMessage;
+  final DateTime? sessionStartedAt;
 
   bool get isBusy => status == AuthStatus.authenticating;
 
@@ -32,6 +39,7 @@ class AuthState {
     AuthStatus? status,
     AppUser? user,
     Object? errorMessage = _sentinel,
+    Object? sessionStartedAt = _sentinel,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -39,6 +47,9 @@ class AuthState {
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
+      sessionStartedAt: identical(sessionStartedAt, _sentinel)
+          ? this.sessionStartedAt
+          : sessionStartedAt as DateTime?,
     );
   }
 }
@@ -68,7 +79,11 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final AppUser user = await _repository.signInWithGovBr();
 
-      state = AuthState(status: AuthStatus.authenticated, user: user);
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        user: user,
+        sessionStartedAt: DateTime.now(),
+      );
     } catch (error) {
       state = AuthState(
         status: AuthStatus.failure,

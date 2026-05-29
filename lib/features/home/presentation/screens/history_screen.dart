@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:minhafilasaude/core/extensions/date_extensions.dart';
-import 'package:minhafilasaude/core/services/audio_announcement_service.dart';
+import 'package:minhafilasaude/core/providers/audio_announcement_provider.dart';
 import 'package:minhafilasaude/core/widgets/app_responsive_body.dart';
 import 'package:minhafilasaude/core/widgets/empty_state_card.dart';
 import 'package:minhafilasaude/features/home/domain/models/queue_history_entry.dart';
@@ -11,12 +11,6 @@ import 'package:minhafilasaude/features/home/presentation/controllers/dashboard_
 import 'package:minhafilasaude/features/home/presentation/widgets/dashboard_header.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/history_entry_card.dart';
 import 'package:minhafilasaude/features/home/presentation/widgets/section_title.dart';
-
-final audioAnnouncementServiceProvider = Provider<AudioAnnouncementService>((
-  Ref ref,
-) {
-  return AudioAnnouncementService();
-});
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -71,21 +65,7 @@ class HistoryScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: HistoryEntryCard(
                         entry: entry,
-                        onPlayPressed: () async {
-                          final audioService = ref.read(
-                            audioAnnouncementServiceProvider,
-                          );
-                          final accessibilityState = ref.read(
-                            accessibilityControllerProvider,
-                          );
-
-                          await audioService.speakHistoryEntry(
-                            title: entry.title,
-                            description: entry.description,
-                            dateLabel: entry.occurredAt.toShortLabel(),
-                            speechRate: accessibilityState.speechRate,
-                          );
-                        },
+                        onPlayPressed: () => _announceHistoryEntry(ref, entry),
                       ),
                     ),
                   ),
@@ -94,6 +74,21 @@ class HistoryScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _announceHistoryEntry(
+    WidgetRef ref,
+    QueueHistoryEntry entry,
+  ) async {
+    final audioService = ref.read(audioAnnouncementServiceProvider);
+    final accessibilityState = ref.read(accessibilityControllerProvider);
+
+    await audioService.speakHistoryEntry(
+      title: entry.title,
+      description: entry.description,
+      dateLabel: entry.occurredAt.toShortLabel(),
+      speechRate: accessibilityState.speechRate,
     );
   }
 }

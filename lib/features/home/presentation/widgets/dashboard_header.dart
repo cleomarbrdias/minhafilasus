@@ -15,7 +15,10 @@ class DashboardHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: <Color>[theme.colorScheme.primary, const Color(0xFF174B8B)],
+          colors: <Color>[
+            theme.colorScheme.primary,
+            theme.colorScheme.primary.withValues(alpha: 0.85),
+          ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -40,7 +43,7 @@ class DashboardHeader extends StatelessWidget {
                   Text(
                     'Acompanhe sua posição e ajude a manter a fila atualizada.',
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.88),
+                      color: Colors.white.withValues(alpha: 0.94),
                     ),
                   ),
                 ],
@@ -49,7 +52,7 @@ class DashboardHeader extends StatelessWidget {
             const SizedBox(width: 16),
             CircleAvatar(
               radius: 24,
-              backgroundColor: Colors.white.withOpacity(0.22),
+              backgroundColor: Colors.white.withValues(alpha: 0.28),
               child: CircleAvatar(
                 radius: 20,
                 backgroundColor: Colors.white,
