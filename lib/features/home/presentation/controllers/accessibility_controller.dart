@@ -31,7 +31,7 @@ class AccessibilityState {
   ///   as preferências forem carregadas do armazenamento local.
   const AccessibilityState.initial()
     : autoAnnounceQueuePosition = false,
-      speechRate = 1.05,
+      speechRate = 0.45,
       highContrastEnabled = false,
       colorBlindAssistEnabled = false,
       textScaleFactor = 1.0,
@@ -44,9 +44,9 @@ class AccessibilityState {
   /// Velocidade da fala usada no TTS.
   ///
   /// Faixa adotada no projeto:
-  /// - 0.45 = mais lenta
-  /// - 1.05 = padrão atual
-  /// - 1.65 = mais rápida
+  /// - 0.30 = mais lenta
+  /// - 0.45 = padrão atual
+  /// - 0.65 = mais rápida
   final double speechRate;
 
   /// Ativa tema de alto contraste para melhorar leitura visual.

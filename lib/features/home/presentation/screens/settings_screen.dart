@@ -165,9 +165,9 @@ class SettingsScreen extends ConsumerWidget {
                     child: Slider(
                       // Faixa ajustada para permitir fala mais lenta
                       // ou significativamente mais rápida, conforme teste do usuário.
-                      min: 0.45,
-                      max: 1.65,
-                      divisions: 12,
+                      min: 0.30,
+                      max: 0.65,
+                      divisions: 7,
                       value: accessibilityState.speechRate,
                       label: accessibilityState.speechRate.toStringAsFixed(2),
                       // Alteração salva automaticamente no armazenamento local.
@@ -194,7 +194,9 @@ class SettingsScreen extends ConsumerWidget {
                 );
               },
               icon: const Icon(Icons.accessibility_new_rounded),
-              label: const Text('Revisar configuração inicial de acessibilidade'),
+              label: const Text(
+                'Revisar configuração inicial de acessibilidade',
+              ),
             ),
             const SizedBox(height: 20),
 
