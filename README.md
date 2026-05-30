@@ -339,8 +339,8 @@ Ao tocar em **“Entrar com gov.br”**, o app autentica usando o `MockAuthRepos
 
 ### Usuário de demonstração
 
-- **Nome:** Maria Silva
-- **CPF:** `***.456.789-**`
+- **Nome:** Cleomar Dias
+- **CPF:** `***.515.791-**`
 
 ### Integração real com gov.br
 
@@ -516,9 +516,17 @@ Arquivo de workflow:
 Os documentos complementares do projeto estão disponíveis em `docs/`:
 
 - `docs/arquitetura.md`
-- `docs/integracao_govbr.md`
-- `docs/integracao_ses.md`
-- `docs/contrato_api_exemplo.md`
+- `docs/acessibilidade.md`
+- `docs/fluxo-negocio.md`
+- `docs/roadmap.md`
+- `docs/backend-overview.md`
+- `docs/api-spec.md`
+- `docs/database-model.md`
+- `docs/admin-panel.md`
+- `docs/auth-flow.md`
+- `docs/validation-flow.md`
+- `docs/integration-plan.md`
+- `docs/development-plan.md`
 
 ---
 
